@@ -1,0 +1,27 @@
+[alias]
+  co = checkout
+  ci = commit
+  st = status
+  br = branch
+  pull = pull --rebase
+  hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
+  type = cat-file -t
+  dump = cat-file -p
+  l = log --oneline
+  gui = !sh -c '/usr/local/opt/git/bin/git gui'
+  ciam = commit --amend --no-edit
+  cim = commit -m
+[user]
+        name = banliu
+	email = banliu@linkedin.com
+[filter "lfs"]
+        clean = git-lfs clean -- %f
+        smudge = git-lfs smudge -- %f
+        process = git-lfs filter-process
+        required = true
+[credential "https://github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential

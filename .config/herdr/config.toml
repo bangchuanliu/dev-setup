@@ -1,0 +1,8 @@
+onboarding = false
+
+[ui]
+# Show only the workspace name in the outer terminal title.
+# Herdr has no {session} token, so each session's workspace is renamed to match
+# its session name. The default "{hostname}: {workspace}" led with the shared
+# hostname, which host terminals truncated to the same "banliu-mn945..." prefix.
+window_title = "{workspace}"

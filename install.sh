@@ -9,6 +9,7 @@ dotfiles=(
 	.tmux.conf
 	.wezterm.lua
 	.zshrc
+	.config/herdr/config.toml
 )
 
 for dotfile in "${dotfiles[@]}"; do
@@ -26,6 +27,7 @@ for dotfile in "${dotfiles[@]}"; do
 		echo "Backed up $destination_path to $backup_path"
 	fi
 
+	mkdir -p -- "$(dirname -- "$destination_path")"
 	ln -s -- "$source_path" "$destination_path"
 	echo "Installed $destination_path"
 done

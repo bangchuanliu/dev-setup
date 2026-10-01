@@ -1,0 +1,4 @@
+# Machine-local / work-specific overrides - never publish (this repo is public).
+.zshrc.local
+*.local
+*.backup.*

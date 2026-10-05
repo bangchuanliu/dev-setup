@@ -62,6 +62,12 @@ config.mouse_bindings = {
 		mods = "NONE",
 		action = wezterm.action.CompleteSelection("ClipboardAndPrimarySelection"),
 	},
+	-- Open a URL or file:// link under the pointer with Command-click.
+	{
+		event = { Up = { streak = 1, button = "Left" } },
+		mods = "CMD",
+		action = wezterm.action.OpenLinkAtMouseCursor,
+	},
 }
 
 ----------------------------------------------------------------------

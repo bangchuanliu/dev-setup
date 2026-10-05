@@ -1,25 +1,35 @@
-# dotfiles
+# dev-setup
 
-dev configs
+Shared macOS development tools and dotfiles. This repository deliberately owns
+only common configuration; agent projects and their project-specific installers
+live elsewhere (for example, `~/agent-files`).
 
-## Setup
+## Fresh-machine setup
 
-Fresh macOS machine - installs Homebrew, WezTerm, iTerm2, then links the dotfiles:
-
-```sh
-./bootstrap.sh
-```
-
-Dotfiles only (Homebrew and the terminal apps already installed):
+Clone this repository, then run its one installer:
 
 ```sh
 ./install.sh
 ```
 
-Both are idempotent and safe to re-run. `install.sh` symlinks each tracked dotfile into
-`$HOME`, backing up anything already there to `<file>.backup.<timestamp>`.
+The installer is safe to re-run. It installs Homebrew when necessary, installs
+the tools listed in [`init.md`](init.md), installs oh-my-zsh, and links the
+tracked dotfiles into `$HOME`. After it finishes, restart the shell:
 
-### Tracked files
+```sh
+exec "$SHELL" -l
+```
+
+Then authenticate GitHub if needed:
+
+```sh
+gh auth login
+```
+
+You can now start an agent session with `pi` and run any project-specific setup
+from your agent-files repository.
+
+## Tracked configurations
 
 | Repo path | Links to |
 |---|---|
@@ -29,23 +39,18 @@ Both are idempotent and safe to re-run. `install.sh` symlinks each tracked dotfi
 | `.zshrc` | `~/.zshrc` |
 | `.config/herdr/config.toml` | `~/.config/herdr/config.toml` |
 
-To track a new dotfile, add it to the repo and append its `$HOME`-relative path to the
-`dotfiles` array in `install.sh`.
+Each destination is a symlink. Edits made in this repository therefore take
+effect immediately without re-running the installer. If a destination already
+exists but is not this repository's symlink, the installer backs it up as
+`<file>.backup.<timestamp>` before linking it.
 
-### Machine-local overrides
+To track a new dotfile, add it to the repository and append its `$HOME`-relative
+path to the `dotfiles` array in `install.sh`.
 
-**This repo is public.** Internal hostnames, work aliases, credentials, and anything else
-machine-specific must stay out of the tracked dotfiles. Keep them in an untracked file
-such as `~/.zshrc.local` (already gitignored) and source it from your local shell config.
+## Machine-local overrides
 
-Never commit internal infrastructure details to this repo.
+**This repository is public.** Internal hostnames, work aliases, credentials,
+and other machine-specific settings must stay out of tracked dotfiles. Keep them
+in an untracked file such as `~/.zshrc.local` (already gitignored).
 
-## Manual steps
-
-Not covered by the scripts:
-
-- Font: [Meslo Dotted](https://github.com/powerline/fonts/tree/master/Meslo%20Dotted) - use `Meslo LG L DZ Regular`
-- Set up an SSH key for GitHub
-- Install oh-my-zsh
-
-
+Never commit internal infrastructure details to this repository.

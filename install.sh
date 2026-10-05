@@ -7,12 +7,14 @@ set -euo pipefail
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
 formulae=(
+	fzf
 	gh
 	pi
+	zoxide
 )
 
 casks=(
-	font-meslo-lg-nerd-font
+	font-meslo-for-powerline
 	iterm2
 	temurin
 	superwhisper
@@ -87,6 +89,42 @@ install_oh_my_zsh() {
 	fi
 }
 
+setup_github_ssh() {
+	local key_path="$HOME/.ssh/id_ed25519"
+	local public_key_path="$key_path.pub"
+
+	log "GitHub SSH"
+	mkdir -p -m 700 "$HOME/.ssh"
+
+	if [[ ! -f "$key_path" ]]; then
+		local email
+		email=$(git config --global --get user.email 2>/dev/null || true)
+		info "Generating GitHub SSH key: $key_path"
+		ssh-keygen -t ed25519 -C "${email:-$USER@$(hostname -s)}" -f "$key_path" -N ""
+	else
+		info "Already present: $key_path"
+	fi
+
+	if [[ ! -f "$public_key_path" ]]; then
+		info "Deriving missing public key: $public_key_path"
+		ssh-keygen -y -f "$key_path" >"$public_key_path"
+	fi
+
+	if gh auth status --hostname github.com >/dev/null 2>&1; then
+		local public_key
+		public_key=$(awk '{print $1 " " $2}' "$public_key_path")
+		if gh api --paginate user/keys --jq '.[].key' | awk '{print $1 " " $2}' | grep -Fqx "$public_key"; then
+			info "SSH key is already registered with GitHub"
+		else
+			info "Adding SSH key to GitHub..."
+			gh ssh-key add "$public_key_path" --title "$(hostname -s)-$(date +%Y%m%d)"
+		fi
+		gh config set git_protocol ssh --host github.com
+	else
+		info "Run 'gh auth login --git-protocol ssh --scopes admin:public_key' and re-run this installer to register the SSH key."
+	fi
+}
+
 link_dotfiles() {
 	log "Dotfiles"
 
@@ -129,7 +167,7 @@ log "Shell"
 install_oh_my_zsh
 
 link_dotfiles
+setup_github_ssh
 
 log "Done"
 info "Restart your shell (or run 'exec \$SHELL -l')."
-info "Authenticate GitHub manually with: gh auth login"

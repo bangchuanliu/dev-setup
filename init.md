@@ -14,9 +14,10 @@ dotfiles into `$HOME`.
 
 | Type | Tools |
 |---|---|
-| Homebrew formulae | GitHub CLI (`gh`), Pi agent (`pi`) |
-| Homebrew casks | Meslo LG Nerd Font, iTerm2, Eclipse Temurin JDK, Superwhisper, WezTerm |
+| Homebrew formulae | fzf, GitHub CLI (`gh`), Pi agent (`pi`), zoxide |
+| Homebrew casks | Meslo LG L DZ for Powerline, iTerm2, Eclipse Temurin JDK, Superwhisper, WezTerm |
 | Shell | oh-my-zsh |
+| GitHub SSH | An `ed25519` key at `~/.ssh/id_ed25519` (generated when absent) |
 | Configurations | Git, tmux, WezTerm, zsh, and herdr (see `README.md`) |
 
 The installer is idempotent: already installed packages and correct symlinks are
@@ -24,11 +25,16 @@ left in place. Existing non-symlink config files are backed up before linking.
 
 ## Manual setup after installation
 
-- Authenticate GitHub and create/use an SSH key as appropriate for the machine:
+- Authenticate GitHub using SSH:
 
   ```sh
-  gh auth login
+  gh auth login --git-protocol ssh --scopes admin:public_key
   ```
+
+  Re-run `./install.sh` after authentication. It registers the generated
+  `~/.ssh/id_ed25519.pub` key with GitHub (unless it is already registered) and
+  configures the GitHub CLI to create new clones with SSH, enabling fetch and
+  push access without an HTTPS credential prompt.
 
 - Restart the shell so the linked zsh configuration and oh-my-zsh load:
 

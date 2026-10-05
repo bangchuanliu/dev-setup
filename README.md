@@ -20,11 +20,17 @@ tracked dotfiles into `$HOME`. After it finishes, restart the shell:
 exec "$SHELL" -l
 ```
 
-Then authenticate GitHub if needed:
+Then authenticate GitHub using SSH and re-run the installer once:
 
 ```sh
-gh auth login
+gh auth login --git-protocol ssh --scopes admin:public_key
+./install.sh
 ```
+
+The installer generates `~/.ssh/id_ed25519` when it is absent. After GitHub
+login, it registers the public key and configures the GitHub CLI to use SSH for
+new clones, so GitHub clone, fetch, and push work without an HTTPS credential
+prompt. Existing HTTPS remotes can be changed with `git remote set-url`.
 
 You can now start an agent session with `pi` and run any project-specific setup
 from your agent-files repository.

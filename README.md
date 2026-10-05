@@ -50,7 +50,22 @@ path to the `dotfiles` array in `install.sh`.
 ## Machine-local overrides
 
 **This repository is public.** Internal hostnames, work aliases, credentials,
-and other machine-specific settings must stay out of tracked dotfiles. Keep them
-in an untracked file such as `~/.zshrc.local` (already gitignored).
+and other machine-specific settings must stay out of tracked dotfiles.
+
+For zsh settings, use `~/.zshrc.local`. The tracked `.zshrc` loads this file
+when it exists, and the repository's `.gitignore` already excludes `*.local`.
+For example:
+
+```sh
+cat >> ~/.zshrc.local <<'EOF'
+# Personal aliases, private paths, and machine-only environment variables.
+alias my-project='cd ~/projects/private-project'
+export PATH="$HOME/private/bin:$PATH"
+EOF
+```
+
+Do not put these settings directly in `.zshrc`: it is a tracked shared config.
+For a one-off shared/local distinction while preparing a commit, use
+`git add -p .zshrc` to stage only the intended common changes.
 
 Never commit internal infrastructure details to this repository.

@@ -135,3 +135,6 @@ alias cla="claude --dangerously-skip-permissions"
 alias coya='copilot --autopilot --allow-all'
 # <<< banliu-dotfiles coya alias <<<
 export PATH="/Applications/WezTerm.app/Contents/MacOS:$PATH"
+
+# Keep machine-specific aliases, paths, and credentials out of this public repo.
+[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"

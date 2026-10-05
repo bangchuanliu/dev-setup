@@ -15,7 +15,7 @@ dotfiles into `$HOME`.
 | Type | Tools |
 |---|---|
 | Homebrew formulae | GitHub CLI (`gh`), Pi agent (`pi`) |
-| Homebrew casks | Meslo LG Nerd Font, iTerm2, Superwhisper, WezTerm |
+| Homebrew casks | Meslo LG Nerd Font, iTerm2, Eclipse Temurin JDK, Superwhisper, WezTerm |
 | Shell | oh-my-zsh |
 | Configurations | Git, tmux, WezTerm, zsh, and herdr (see `README.md`) |
 

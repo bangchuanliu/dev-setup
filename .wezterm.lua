@@ -43,6 +43,16 @@ config.cursor_blink_rate = 600
 ----------------------------------------------------------------------
 
 config.selection_word_boundary = " \t\n{}[]()\"'`,;:@"
+
+-- WezTerm recognizes URLs and file:// URIs by default, but terminal output
+-- commonly contains plain absolute paths (often followed by :line). Turn the
+-- path portion into a file URI so Command-click can open it with macOS.
+config.hyperlink_rules = wezterm.default_hyperlink_rules()
+table.insert(config.hyperlink_rules, {
+	regex = [[/[\w./~_-]+]],
+	format = "file://$0",
+})
+
 ----------------------------------------------------------------------
 -- Scrolling
 ----------------------------------------------------------------------

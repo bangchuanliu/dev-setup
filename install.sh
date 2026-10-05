@@ -14,6 +14,7 @@ formulae=(
 casks=(
 	font-meslo-lg-nerd-font
 	iterm2
+	temurin
 	superwhisper
 	wezterm
 )

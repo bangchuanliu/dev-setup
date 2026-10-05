@@ -75,6 +75,15 @@ table.insert(config.hyperlink_rules, {
 	format = "relfile://$1",
 })
 
+-- Bare filenames with no directory component, e.g. the last column of
+-- `ls -l`/`ll` output (Brewfile, install.sh, README.md). Only matched at
+-- end-of-line and must start with a letter/underscore so it doesn't catch
+-- numeric tokens like file sizes (2.6K) or IP addresses (127.0.0.1).
+table.insert(config.hyperlink_rules, {
+	regex = [[(?<![\w./-])([A-Za-z_][\w-]*\.\w{1,10})(?=\s*$)]],
+	format = "relfile://$1",
+})
+
 -- Resolve and open the custom relfile:// links created above.
 wezterm.on("open-uri", function(window, pane, uri)
 	local relpath = uri:match("^relfile://(.+)$")

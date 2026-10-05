@@ -20,9 +20,26 @@ symlinks the tracked dotfiles into `$HOME`.
 | GitHub SSH | An `ed25519` key at `~/.ssh/id_ed25519` (generated when absent) |
 | Configurations | Git, tmux, WezTerm, zsh, and herdr (see `README.md`) |
 
-The installer is idempotent: `brew bundle` leaves installed packages in place,
-and correct symlinks are left in place. Existing non-symlink config files are
-backed up before linking. Add or remove shared Homebrew packages in `Brewfile`.
+The installer is idempotent: already installed Homebrew packages prompt before
+anything is overridden (see below), and correct symlinks are left in place.
+Existing non-symlink config files are backed up before linking. Add or remove
+shared Homebrew packages in `Brewfile`.
+
+## Homebrew package prompts
+
+Each `Brewfile` entry is checked before installing. Missing formulae and casks
+are installed directly. Entries that are already present - including an app in
+`/Applications` that Homebrew does not manage - prompt for a choice:
+
+| Answer | Effect |
+|---|---|
+| `y` | Reinstall (or force-install) this entry |
+| `n` | Keep what is installed (default) |
+| `a` | Override every remaining entry |
+| `s` | Skip every remaining entry |
+
+Set `DEV_SETUP_ON_CONFLICT=override` or `DEV_SETUP_ON_CONFLICT=skip` to answer
+in advance. Without a terminal, the installer keeps what is installed.
 
 ## Manual setup after installation
 

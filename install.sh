@@ -17,6 +17,9 @@ dotfiles=(
 log() { printf '\n==> %s\n' "$1"; }
 info() { printf '    %s\n' "$1"; }
 
+# ask (default), override, or skip when a Brewfile entry is already installed.
+conflict_policy="${DEV_SETUP_ON_CONFLICT:-ask}"
+
 if [[ "$(uname -s)" != "Darwin" ]]; then
 	echo "This installer only supports macOS." >&2
 	exit 1
@@ -52,6 +55,117 @@ install_oh_my_zsh() {
 		info "Installing oh-my-zsh..."
 		git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "$HOME/.oh-my-zsh"
 	fi
+}
+
+brewfile_entries() {
+	# Print the names declared for one Brewfile directive (brew, cask, or tap).
+	sed -n -E "s/^[[:space:]]*$1[[:space:]]+[\"']([^\"']+)[\"'].*/\1/p" "$script_dir/Brewfile"
+}
+
+read_brewfile_entries() {
+	# Collect entries up front so prompts later keep the caller's stdin.
+	local directive="$1" line
+	brewfile_names=()
+
+	while IFS= read -r line; do
+		[[ -n "$line" ]] && brewfile_names+=("$line")
+	done < <(brewfile_entries "$directive")
+}
+
+cask_existing_app() {
+	# Print the path of an already present app bundle that this cask would own,
+	# which catches apps installed outside of Homebrew.
+	local app_name app_path
+	while IFS= read -r app_name; do
+		app_path="/Applications/$app_name"
+		if [[ -e "$app_path" ]]; then
+			echo "$app_path"
+			return 0
+		fi
+	done < <(brew info --cask "$1" 2>/dev/null | sed -n -E 's/^(.+\.app) \(App\)$/\1/p')
+
+	return 1
+}
+
+# Answer whether an already installed entry should be overridden.
+should_override() {
+	local label="$1" answer
+
+	case "$conflict_policy" in
+	override) return 0 ;;
+	skip) return 1 ;;
+	esac
+
+	if [[ ! -t 0 ]]; then
+		info "Not an interactive shell; keeping existing $label"
+		return 1
+	fi
+
+	while true; do
+		printf '    %s is already installed. Override? [y]es / [n]o / [a]ll / [s]kip all: ' "$label"
+		read -r answer || answer=n
+		case "$answer" in
+		y | Y) return 0 ;;
+		n | N | "") return 1 ;;
+		a | A)
+			conflict_policy=override
+			return 0
+			;;
+		s | S)
+			conflict_policy=skip
+			return 1
+			;;
+		esac
+	done
+}
+
+install_brewfile() {
+	log "Homebrew packages"
+
+	local name existing_app
+
+	read_brewfile_entries tap
+	for name in ${brewfile_names+"${brewfile_names[@]}"}; do
+		info "Tapping $name..."
+		brew tap "$name"
+	done
+
+	read_brewfile_entries brew
+	for name in ${brewfile_names+"${brewfile_names[@]}"}; do
+		if brew list --formula --versions "$name" >/dev/null 2>&1; then
+			if should_override "Formula $name"; then
+				info "Reinstalling formula: $name"
+				brew reinstall --formula "$name"
+			else
+				info "Skipped formula: $name"
+			fi
+		else
+			info "Installing formula: $name"
+			brew install --formula "$name"
+		fi
+	done
+
+	read_brewfile_entries cask
+	for name in ${brewfile_names+"${brewfile_names[@]}"}; do
+		if brew list --cask --versions "$name" >/dev/null 2>&1; then
+			if should_override "Cask $name"; then
+				info "Reinstalling cask: $name"
+				brew reinstall --cask "$name"
+			else
+				info "Skipped cask: $name"
+			fi
+		elif existing_app=$(cask_existing_app "$name"); then
+			if should_override "Cask $name ($existing_app, not managed by Homebrew)"; then
+				info "Replacing $existing_app with cask: $name"
+				brew install --cask --force "$name"
+			else
+				info "Skipped cask: $name"
+			fi
+		else
+			info "Installing cask: $name"
+			brew install --cask "$name"
+		fi
+	done < <(brewfile_entries cask)
 }
 
 setup_github_ssh() {
@@ -118,8 +232,7 @@ link_dotfiles() {
 
 ensure_homebrew
 
-log "Homebrew packages"
-brew bundle --file="$script_dir/Brewfile"
+install_brewfile
 
 log "Shell"
 install_oh_my_zsh

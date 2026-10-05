@@ -12,9 +12,11 @@ Clone this repository, then run its one installer:
 ./install.sh
 ```
 
-The installer is safe to re-run. It installs Homebrew when necessary, applies
-the shared package manifest in [`Brewfile`](Brewfile), installs oh-my-zsh, and
-links the tracked dotfiles into `$HOME`. After it finishes, restart the shell:
+The installer is safe to re-run. It installs Homebrew when necessary, installs
+the missing packages from the shared manifest in [`Brewfile`](Brewfile) and
+prompts before overriding packages that are already installed, installs
+oh-my-zsh, and links the tracked dotfiles into `$HOME`. After it finishes,
+restart the shell:
 
 ```sh
 exec "$SHELL" -l

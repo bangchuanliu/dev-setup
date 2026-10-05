@@ -6,21 +6,6 @@ set -euo pipefail
 
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
-formulae=(
-	fzf
-	gh
-	pi
-	zoxide
-)
-
-casks=(
-	font-meslo-for-powerline
-	iterm2
-	temurin
-	superwhisper
-	wezterm
-)
-
 dotfiles=(
 	.gitconfig
 	.tmux.conf
@@ -58,26 +43,6 @@ ensure_homebrew() {
 	fi
 
 	info "Using $(brew --version | head -n 1) at $(command -v brew)"
-}
-
-install_formula() {
-	local formula="$1"
-	if brew list --formula "$formula" >/dev/null 2>&1; then
-		info "Already installed: $formula"
-	else
-		info "Installing $formula..."
-		brew install "$formula"
-	fi
-}
-
-install_cask() {
-	local cask="$1"
-	if brew list --cask "$cask" >/dev/null 2>&1; then
-		info "Already installed: $cask"
-	else
-		info "Installing $cask..."
-		brew install --cask "$cask"
-	fi
 }
 
 install_oh_my_zsh() {
@@ -153,15 +118,8 @@ link_dotfiles() {
 
 ensure_homebrew
 
-log "Command-line tools"
-for formula in "${formulae[@]}"; do
-	install_formula "$formula"
-done
-
-log "Applications and font"
-for cask in "${casks[@]}"; do
-	install_cask "$cask"
-done
+log "Homebrew packages"
+brew bundle --file="$script_dir/Brewfile"
 
 log "Shell"
 install_oh_my_zsh

@@ -138,3 +138,7 @@ export PATH="/Applications/WezTerm.app/Contents/MacOS:$PATH"
 
 # Keep machine-specific aliases, paths, and credentials out of this public repo.
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+# >>> leetcode jrun >>>
+export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
+alias jrun='/Users/liubangchuan/projects/leetcode/scripts/jrun'
+# <<< leetcode jrun <<<

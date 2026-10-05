@@ -7,8 +7,8 @@ machine, clone this repository and run it:
 ./install.sh
 ```
 
-It installs the following shared development tools, then symlinks the tracked
-dotfiles into `$HOME`.
+It applies the shared Homebrew package manifest in [`Brewfile`](Brewfile), then
+symlinks the tracked dotfiles into `$HOME`.
 
 ## Installed automatically
 
@@ -20,8 +20,9 @@ dotfiles into `$HOME`.
 | GitHub SSH | An `ed25519` key at `~/.ssh/id_ed25519` (generated when absent) |
 | Configurations | Git, tmux, WezTerm, zsh, and herdr (see `README.md`) |
 
-The installer is idempotent: already installed packages and correct symlinks are
-left in place. Existing non-symlink config files are backed up before linking.
+The installer is idempotent: `brew bundle` leaves installed packages in place,
+and correct symlinks are left in place. Existing non-symlink config files are
+backed up before linking. Add or remove shared Homebrew packages in `Brewfile`.
 
 ## Manual setup after installation
 

@@ -12,6 +12,8 @@ config.font = wezterm.font_with_fallback({
 })
 config.font_size = 16.0
 config.line_height = 1.1
+-- Disable ligatures (e.g. "fi") to avoid glyph-width rendering artifacts
+config.harfbuzz_features = { "calt=0", "clig=0", "liga=0" }
 
 config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
 config.window_background_opacity = 0.96
@@ -45,13 +47,51 @@ config.cursor_blink_rate = 600
 config.selection_word_boundary = " \t\n{}[]()\"'`,;:@"
 
 -- WezTerm recognizes URLs and file:// URIs by default, but terminal output
--- commonly contains plain absolute paths (often followed by :line). Turn the
--- path portion into a file URI so Command-click can open it with macOS.
+-- commonly contains plain paths (absolute, home-relative, or relative to the
+-- shell's cwd), often followed by :line or :line:col. Turn those into links
+-- so Command-click can open them with macOS.
 config.hyperlink_rules = wezterm.default_hyperlink_rules()
+
+-- Absolute paths, e.g. /Users/me/project/foo.lua
+-- (not preceded by ~, a word char, or . -- those belong to the other rules)
 table.insert(config.hyperlink_rules, {
-	regex = [[/[\w./~_-]+]],
+	regex = [[(?<![\w~.])/[\w./~_-]+]],
 	format = "file://$0",
 })
+
+-- Home-relative paths, e.g. ~/project/foo.lua
+table.insert(config.hyperlink_rules, {
+	regex = [[~(/[\w./_-]+)]],
+	format = "file://" .. (os.getenv("HOME") or "") .. "$1",
+})
+
+-- Paths relative to the shell's current working directory, e.g.
+-- src/foo.ts, ./foo.lua, or compiler-style foo.go:12:5. These can't be
+-- resolved to an absolute path at config-load time, so they're tagged with
+-- a custom scheme and resolved against the pane's actual cwd (via OSC 7)
+-- in the open-uri handler below.
+table.insert(config.hyperlink_rules, {
+	regex = [[(?<![\w./-])((?:\.\.?/|[\w-]+/)[\w./-]*\.\w+)(:\d+(:\d+)?)?]],
+	format = "relfile://$1",
+})
+
+-- Resolve and open the custom relfile:// links created above.
+wezterm.on("open-uri", function(window, pane, uri)
+	local relpath = uri:match("^relfile://(.+)$")
+	if not relpath then
+		return true
+	end
+
+	local base_dir = os.getenv("HOME")
+	local cwd_url = pane:get_current_working_dir()
+	if cwd_url then
+		base_dir = cwd_url.file_path
+	end
+
+	local full_path = base_dir .. "/" .. relpath
+	wezterm.open_with(full_path)
+	return false
+end)
 
 ----------------------------------------------------------------------
 -- Scrolling
